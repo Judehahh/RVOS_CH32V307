@@ -1,9 +1,5 @@
 #include "types.h"
-//#include "platform.h"
-
-#define RCC   0x40021000L
-#define GPIOA   0x40010800L
-#define UART1 0x40013800L
+#include "platform.h"
 
 #define RCC_REG(reg)  ((volatile uint32_t *)(RCC + (reg << 2)))
 #define GPIO_REG(reg)  ((volatile uint32_t *)(GPIOA + (reg << 2)))
@@ -69,49 +65,55 @@ typedef enum {
 
 void uart_init()
 {
+    /* Enable HSI */
     *RCC_REG(CTLR) |= (uint32_t)0x00000001;
 
-    *RCC_REG(CFGR0)|= (uint32_t)(0x00280000);
+    /* PLL multiplied by 12 */
+    *RCC_REG(CFGR0) |= (uint32_t)(0x00280000);
 
     /* Enable PLL */
-    *RCC_REG(CTLR) |= 0x01000000;
+    *RCC_REG(CTLR) |= (uint32_t)0x01000000;
+
     /* Wait till PLL is ready */
-    while((*RCC_REG(CTLR) & 0x02000000) == 0)
-    {
-    }
-    /* Select PLL as system clock source */
+    while((*RCC_REG(CTLR) & (uint32_t)0x02000000) == 0);
+
+    /* 
+     * Select PLL as system clock source
+     *
+     * HSI = 8MHz
+     * PLLSRC = HSI / 2 = 4MHz
+     * PLL = PLLSRC * 12 = 48MHz
+     * SYSCLK = PLL = 48MHz
+     */
     *RCC_REG(CFGR0) &= (uint32_t)((uint32_t)~(0x00000003));
     *RCC_REG(CFGR0) |= (uint32_t)0x00000002;
-    /* Wait till PLL is used as system clock source */
-    while ((*RCC_REG(CFGR0) & (uint32_t)0x0000000C) != (uint32_t)0x08)
-    {
-    }
+
+    /* 
+     * Wait till PLL is used as system clock source
+     */
+    while ((rcc_read_reg(CFGR0) & (uint32_t)0x0000000C) != (uint32_t)0x08);
 
 
     /*
      * Enable clock of USART1 and GPIO_PA
      */
-    rcc_write_reg(APB2PCENR, (1 << 14) | (1 << 2));
+    rcc_write_reg(APB2PCENR, (uint32_t)((uint32_t)(1 << 14) | (uint32_t)(1 << 2)));
 
     /*
      * Setting GPIO PA9 to
      * - Reuse push-pull output mode
      * - Speed 50MHz
      */
-    gpio_write_reg(CFGHR, 0x488444b4);
+    *GPIO_REG(CFGHR) |= (uint32_t)(0x000000B0);
 
-    /* set baud rate to 115200
+    /* set baud rate to 57600
      * BaudRate = FCLK / (16 * USARTDIV)
      * USARTDIV = DIV_M + ( DIV_F / 16)
      * - DIV_M: [15:4] of BRR
      * - DIV_F: [3:0] of BRR
      */
-    uart_write_reg(BRR, 833);
-    uart_write_reg(CTLR1, (1 << 3) | (1 << 13));
-    uart_write_reg(DATAR, ('a' & (uint16_t)0x01FF));
-    while ((uart_read_reg(START) & STATR_TX_IDLE) == (uint16_t)0);
-    uart_write_reg(DATAR, ('\n' & (uint16_t)0x01FF));
-    while ((uart_read_reg(START) & STATR_TX_IDLE) == (uint16_t)0);
+    uart_write_reg(BRR, (uint16_t)0x0341);
+    uart_write_reg(CTLR1, (uint16_t)((uint16_t)(1 << 3) | (uint16_t)(1 << 13)));
 }
 
 void uart_putc(uint16_t ch)

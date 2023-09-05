@@ -33,9 +33,9 @@ flash: all
 
 .PHONY : debug
 debug: all
-	@echo "---------------------------------------------------------"
-# @echo "Press Ctrl-C and then input 'quit' to exit GDB and OpenOcd"
-	@echo "---------------------------------------------------------"
+	@echo "-----------------------------------------------"
+	@echo "Please manually kill the openocd after gbd quit"
+	@echo "-----------------------------------------------"
 	@${OPENOCD} -f ${CFG} &
 	@${GDB} os.elf -q -x ../gdbinit
 
