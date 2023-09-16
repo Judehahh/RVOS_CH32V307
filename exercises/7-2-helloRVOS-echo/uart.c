@@ -106,6 +106,12 @@ void uart_init()
      */
     *GPIO_REG(CFGHR) |= (uint32_t)(0x000000B0);
 
+    /*
+     * Setting GPIO PA10 to
+     * - Floating input mode
+     */
+    *GPIO_REG(CFGHR) |= (uint32_t)(0x00000400);
+
     /* Set baud rate to 57600
      * BaudRate = FCLK / (16 * USARTDIV)
      * USARTDIV = DIV_M + ( DIV_F / 16)
@@ -114,8 +120,8 @@ void uart_init()
      */
     uart_write_reg(BRR, (uint16_t)0x0341);
 
-    /* Enable Tx for UART0 */
-    uart_write_reg(CTLR1, (uint16_t)((uint16_t)(1 << 3) | (uint16_t)(1 << 13)));
+    /* Enable Rx and Tx for UART0 */
+    uart_write_reg(CTLR1, (uint16_t)((uint16_t)(1 << 2) | (uint16_t)(1 << 3) | (uint16_t)(1 << 13)));
 }
 
 void uart_putc(uint16_t ch)
@@ -129,4 +135,10 @@ void uart_puts(char *s)
     while (*s) {
         uart_putc(*s++);
     }
+}
+
+uint16_t uart_getc()
+{
+    while ((uart_read_reg(START) & STATR_RX_READY) == (uint16_t)0);
+    return (uint16_t)(uart_read_reg(DATAR) & (uint16_t)0x01FF);
 }
