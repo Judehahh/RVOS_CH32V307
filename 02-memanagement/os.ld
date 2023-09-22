@@ -1,5 +1,5 @@
 /*
- * rvos.ld
+ * os.ld
  * Linker script for outputting to RVOS
  */
 
@@ -58,6 +58,11 @@ SECTIONS {
         PROVIDE(_rodata_end = .);
     } >FLASH AT>FLASH
 
+    /*
+     * .data section is placed in RAM during runtime but in FLASH during linking.
+     * The symbol _data_vma equal to the start of the .data section in RAM (VMA).
+     * The symbol _data_lma equal to the start of the .data section in FLASH (LMA).
+     */
     .dalign : {
         . = ALIGN(4);
         PROVIDE(_data_vma = .);
