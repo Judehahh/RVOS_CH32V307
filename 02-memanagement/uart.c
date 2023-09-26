@@ -1,5 +1,4 @@
-#include "types.h"
-#include "platform.h"
+#include "os.h"
 
 #define RCC_REG(reg)  ((volatile uint32_t *)(RCC + (reg << 2)))
 #define GPIO_REG(reg)  ((volatile uint32_t *)(GPIOA + (reg << 2)))

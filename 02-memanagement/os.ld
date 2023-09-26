@@ -98,9 +98,9 @@ SECTIONS {
         PROVIDE(_stack_end = .);
     } >RAM
 
-    PROVIDE(_memory_start = ORIGIN(ram));
-    PROVIDE(_memory_end = ORIGIN(ram) + LENGTH(RAM));
+    PROVIDE(_memory_start = ORIGIN(RAM));
+    PROVIDE(_memory_end = ORIGIN(RAM) + LENGTH(RAM));
 
     PROVIDE(_heap_start = _bss_end);
-    PROVIDE(_heap_size = _heap_start - _heap_start);
+    PROVIDE(_heap_size = _stack_start - _heap_start);
 }
