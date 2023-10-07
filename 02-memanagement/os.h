@@ -15,4 +15,8 @@ extern void uart_puts(char *s);
 extern int printf(const char *s, ...);
 extern void uart_printf(char *fmt, ...);
 
+/* memory management */
+extern void *page_alloc(int npages);
+extern void page_free(void *p);
+
 #endif /* __OS_H__ */

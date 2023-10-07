@@ -1,5 +1,9 @@
 #include "os.h"
 
+/*
+ * ref: https://github.com/cccriscv/mini-riscv-os/blob/master/05-Preemptive/lib.c
+ */
+
 static int _vsnprintf(char *out, size_t n, const char *s, va_list v1) {
     size_t pos = 0;
     int is_format = 0;
@@ -25,7 +29,7 @@ static int _vsnprintf(char *out, size_t n, const char *s, va_list v1) {
                 }   // don't break here!!!
                 case 'x': {
                     long num = is_long ? va_arg(v1, long) : va_arg(v1, int);
-                    int hex_digits = 2 * (is_long ? sizeof(long) : sizeof(int)); // tow hex numbers in one byte
+                    int hex_digits = 2 * (is_long ? sizeof(long) : sizeof(int)); // two hex numbers in one byte
                     for (int i = hex_digits - 1; i >= 0; i--) {
                         int digit = (num >> (i * 4)) & 0xF;
                         if (out && pos < n) {
@@ -39,7 +43,7 @@ static int _vsnprintf(char *out, size_t n, const char *s, va_list v1) {
                 }
                 case 'X': {
                     long num = is_long ? va_arg(v1, long) : va_arg(v1, int);
-                    int hex_digits = 2 * (is_long ? sizeof(long) : sizeof(int)); // tow hex numbers in one byte
+                    int hex_digits = 2 * (is_long ? sizeof(long) : sizeof(int)); // two hex numbers in one byte
                     for (int i = hex_digits - 1; i >= 0; i--) {
                         int digit = (num >> (i * 4)) & 0xF;
                         if (out && pos < n) {
@@ -110,7 +114,6 @@ static int _vsnprintf(char *out, size_t n, const char *s, va_list v1) {
         if (out && pos < n) {
             out[pos] = 0;
         }
-
     }
 
     return pos;
@@ -123,7 +126,7 @@ static int _vprintf(const char *s, va_list v1)
     int len = 0;
     len = _vsnprintf(NULL, -1, s, v1);
     if (len > sizeof(out_buf) - 1) {
-        uart_puts("[ERROR] _vprintf: buffer overflow.\r\n");
+        uart_puts("[ERROR] _vprintf() output string size overflow.\r\n");
         while (1) {}
     }
     _vsnprintf(out_buf, len + 1, s, v1);    // add 1 for '\0'

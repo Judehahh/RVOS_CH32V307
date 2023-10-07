@@ -1,5 +1,9 @@
 #include "os.h"
 
+/*
+ * Following functions SHOULD be called ONLY ONE time here,
+ * so just declared here ONCE and NOT included in file os.h.
+ */
 extern void uart_init(void);
 extern void page_init(void);
 
@@ -22,6 +26,17 @@ void start_kernel(void)
     printf("addr of static_var = %p\n", &static_var);
     printf("addr of static_var_uninit = %p\n", &static_var_uninit);
     printf("addr of auto_var = %p\n", &auto_var);
+
+    void *p = page_alloc(2);
+    printf("p = %p\n", p);
+    page_free(p);
+    printf("free p\n");
+
+    void *p2 = page_alloc(3);
+    printf("p2 = %p\n", p2);
+
+    void *p3 = page_alloc(4);
+    printf("p3 = %p\n", p3);
 
     while (1) {};
 }
