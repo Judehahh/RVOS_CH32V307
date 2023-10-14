@@ -85,8 +85,8 @@ void *malloc(uint32_t nbytes)
             return (void *)(p + 1);     /* skip the head */
         }
         if (p == freep) {
-            printf("[ERROR] malloc() no enough blocks.\r\n");
-            while (1) {}
+            printf("[ERROR] malloc(): not enough blocks.\r\n");
+            return NULL;
         }
     }
 }

@@ -126,7 +126,7 @@ static int _vprintf(const char *s, va_list v1)
     int len = 0;
     len = _vsnprintf(NULL, -1, s, v1);
     if (len > sizeof(out_buf) - 1) {
-        uart_puts("[ERROR] _vprintf() output string size overflow.\r\n");
+        uart_puts("[ERROR] _vprintf(): output string size overflow.\r\n");
         while (1) {}
     }
     _vsnprintf(out_buf, len + 1, s, v1);    // add 1 for '\0'

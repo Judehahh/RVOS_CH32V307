@@ -111,7 +111,7 @@ void page_init()
  */
 void *page_alloc(int npages)
 {
-    if (npages <= 0) {
+    if (npages <= 0 || _num_pages < npages) {
         return NULL;
     }
 
