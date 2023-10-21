@@ -1,5 +1,5 @@
 CROSS_COMPILE = riscv64-unknown-elf-
-CFLAGS = -nostdlib -fno-builtin -march=rv32imac -mabi=ilp32 -g -Wall
+CFLAGS = -nostdlib -fno-builtin -march=rv32imac_zicsr -mabi=ilp32 -g -Wall
 
 OPENOCD_DIR = ../MRS_Toolchain_Linux_x64_V1.80/OpenOCD/bin
 OPENOCD = ${OPENOCD_DIR}/openocd
