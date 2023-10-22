@@ -66,7 +66,7 @@ SECTIONS {
     .dalign : {
         . = ALIGN(4);
         PROVIDE(_data_vma = .);
-    } >RAM AT>FLASH	
+    } >RAM AT>FLASH
 
     .dlalign : {
         . = ALIGN(4); 

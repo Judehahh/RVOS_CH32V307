@@ -145,3 +145,9 @@ int printf(const char *s, ...)
 
     return ret;
 }
+
+void panic(char *s)
+{
+    printf("[ERROR] panic: %s\n", s);
+    while (1) {}
+}

@@ -13,7 +13,7 @@ extern void uart_puts(char *s);
 
 /* printf */
 extern int printf(const char *s, ...);
-extern void uart_printf(char *fmt, ...);
+extern void panic(char *s);
 
 /* memory management */
 extern void *page_alloc(int npages);
