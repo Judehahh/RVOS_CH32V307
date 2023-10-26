@@ -55,7 +55,7 @@ struct context {
     reg_t t6;
 };
 
-int task_create(void (*start_routin)(void));
+extern int task_create(void (*start_routin)(void));
 extern void task_delay(volatile int count);
 extern void task_yield();
 
