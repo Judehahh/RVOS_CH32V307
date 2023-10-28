@@ -32,6 +32,8 @@ make
 ```shell
 make flash
 ```
+使用`57600`波特率打开串口，按下开发板上的`RESET`按钮，即可观察到输出：
+![output](/pic/output.png)
 
 调试代码：
 ```shell

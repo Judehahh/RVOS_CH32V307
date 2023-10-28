@@ -13,6 +13,9 @@ extern void switch_to(struct context *next);
 uint8_t __attribute__((aligned(16))) task_stack[MAX_TASKS][STACK_SIZE];
 struct context ctx_tasks[MAX_TASKS];
 
+uint8_t __attribute__((aligned(16))) sched_stack[STACK_SIZE];
+struct context sched_task;
+
 /*
  * _top is used to mark the max available position of ctx_tasks
  * _current is used to point to the context of current task
@@ -28,9 +31,12 @@ static void w_mscratch(reg_t x)
                 "r" (x));
 }
 
+void schedule();
 void sched_init()
 {
     w_mscratch(0);
+    sched_task.sp = (reg_t)&sched_stack[STACK_SIZE];
+    sched_task.ra = (reg_t)schedule;
 }
 
 /*
@@ -76,7 +82,7 @@ int task_create(void (*start_routin)(void))
  */
 void task_yield()
 {
-    schedule();
+    switch_to(&sched_task);
 }
 
 /*
