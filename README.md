@@ -1,11 +1,25 @@
 # RVOS_ch32v307
 
-此仓库为 RVOS 课程在 ch32v307 开发板上的移植，目前实现了启动程序以及 UART 驱动，可以通过 UART1 打印出 "Hello, RVOS!"。
+此仓库为 RVOS 课程在 ch32v307 开发板上的移植，目前已完成：
+- [x] 00-bootstrap
+- [x] 01-helloRVOS
+- [x] 02-memanagement
+- [x] 03-contextswitch
+- [x] 04-multitask
+- [x] exercise-7-1-helloRVOS-asm
+- [x] exercise-7-2-helloRVOS-echo
+- [x] exercise-8-1-memanagement-byte
+- [x] exercise-9-1-multitask-with param, priority and exit
+- [x] exercise-9-2-multitask-scheduletask
+- [ ] ...
 
 ## 准备
+
+### Linux
+
 > 以下工作仅在 debian 中得到验证，仅供参考。
 
-> 另外 linux 下的 wch 调试工具并不那么好用，可以选择在 linux 下编译后在 Windows 中再使用 wch 的相关工具进行刷入或调试。
+> 如果觉得 linux 下的 OpenOCD 工具不那么好用，可以选择在 linux 下编译后在 Windows 中再使用 wch 的相关工具进行刷入或调试。
 
 工具安装：
 ```shell
@@ -18,6 +32,24 @@ git clone https://github.com/Judehahh/RVOS_ch32v307.git
 cd RVOS_ch32v307
 wget http://file.mounriver.com/tools/MRS_Toolchain_Linux_x64_V1.80.tar.xz
 tar -xvf MRS_Toolchain_Linux_x64_V1.80.tar.xz
+```
+
+### MACOS
+
+工具安装：
+```shell
+brew install riscv64-elf-binutils riscv64-elf-gcc riscv64-elf-gdb
+```
+
+下载代码以及 OpenOCD 工具：
+```shell
+git clone https://github.com/Judehahh/RVOS_ch32v307.git
+cd RVOS_ch32v307
+wget wget http://file.mounriver.com/tools/MRS_Toolchain_MAC_V190.zip
+unzip MRS_Toolchain_MAC_V190.zip
+cd MRS_Toolchain_MAC_V190
+unzip openocd_x86_64.zip
+cd ..
 ```
 
 ## 运行

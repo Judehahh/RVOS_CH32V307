@@ -1,11 +1,18 @@
-CROSS_COMPILE = riscv64-unknown-elf-
+ifeq ($(shell uname -s),Linux)
+	CROSS_COMPILE = riscv64-unknown-elf-
+	OPENOCD_DIR = ../MRS_Toolchain_Linux_x64_V1.80/OpenOCD/bin
+	GDB = gdb-multiarch
+else ifeq ($(shell uname -s),Darwin)
+	CROSS_COMPILE = riscv64-elf-
+	OPENOCD_DIR = ../MRS_Toolchain_MAC_V190/openocd_x86_64/openocd_x86_64/bin
+	GDB = riscv64-elf-gdb
+endif
+
 CFLAGS = -nostdlib -fno-builtin -march=rv32imac_zicsr -mabi=ilp32 -g -Wall
 
-OPENOCD_DIR = ../MRS_Toolchain_Linux_x64_V1.80/OpenOCD/bin
 OPENOCD = ${OPENOCD_DIR}/openocd
 CFG = ${OPENOCD_DIR}/wch-riscv.cfg
 
-GDB = gdb-multiarch
 CC = ${CROSS_COMPILE}gcc
 OBJCOPY = ${CROSS_COMPILE}objcopy
 OBJDUMP = ${CROSS_COMPILE}objdump
