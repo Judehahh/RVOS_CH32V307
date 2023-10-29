@@ -54,7 +54,7 @@ void schedule()
  *  - start_routin: task routine entry
  * RETURN VALUE
  *  0: success
- *  -1: if error occured
+ *  -1: if error occurred
  */
 int task_create(void (*start_routin)(void))
 {
