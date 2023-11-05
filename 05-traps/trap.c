@@ -16,8 +16,9 @@ reg_t trap_handler(reg_t epc, reg_t cause)
         printf("interruption!\n");
     } else {
         printf("exception! code = %d\n", cause_code);
+        panic("OOPS! What can I do!");
+        //return_pc += 4;
     }
-    panic("go into trap_handler!");
 
     return return_pc;
 }

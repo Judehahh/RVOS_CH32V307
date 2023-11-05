@@ -30,7 +30,7 @@ typedef enum {
 } GPIO_TypeDef;
 
 typedef enum {
-    START = 0,
+    STATR = 0,
     DATAR = 1,
     BRR = 2,
     CTLR1 = 3,
@@ -120,7 +120,7 @@ void uart_init()
 void uart_putc(uint16_t ch)
 {
     uart_write_reg(DATAR, (ch & (uint16_t)0x01FF));
-    while ((uart_read_reg(START) & STATR_TX_IDLE) == (uint16_t)0);
+    while ((uart_read_reg(STATR) & STATR_TX_IDLE) == (uint16_t)0);
 }
 
 void uart_puts(char *s)
