@@ -9,7 +9,7 @@
  * 0x4001 0800 -- Port A
  * 0x4001 3800 -- USART1
  * 0x4002 1000 -- RCC
- * 0xE000E000L -- PFIC
+ * 0xE000 E000 -- PFIC
  */
 #define GPIOA 0x40010800L
 #define UART1 0x40013800L

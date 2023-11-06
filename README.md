@@ -6,11 +6,15 @@
 - [x] 02-memanagement
 - [x] 03-contextswitch
 - [x] 04-multitask
+- [x] 05-traps
+- [x] 06-interrupts
+- [ ] 07-hwtimer
 - [x] exercise-7-1-helloRVOS-asm
 - [x] exercise-7-2-helloRVOS-echo
 - [x] exercise-8-1-memanagement-byte
 - [x] exercise-9-1-multitask-with param, priority and exit
 - [x] exercise-9-2-multitask-scheduletask
+- [ ] exercise-11-1-uart-write-interrupt
 - [ ] ...
 
 ## 准备
@@ -77,3 +81,9 @@ make debug
 ```shell
 make code
 ```
+
+## 说明
+
+### 07. 硬件定时器
+
+由于外设寄存器数量增加，参照沁恒官方的写法，修改成以 `struct` 的方式来读写寄存器，使寄存器读写操作更加方便；同时将 rcc 的初始化工作分离出来到 `rcc.c` 中。
