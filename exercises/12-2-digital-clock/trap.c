@@ -17,7 +17,7 @@ reg_t trap_handler(reg_t epc, reg_t cause)
     if (cause & 0x80000000) {
         switch (cause_code) {
             case 12:
-                uart_puts("SysTick interruption!\n");
+                // uart_puts("SysTick interruption!\n");
                 timer_handler();
                 break;
             case 53:

@@ -18,9 +18,9 @@ void start_kernel(void)
 {
     rcc_init();
     uart_init();
-    uart_puts("Hello, RVOS!\r\n");
+    uart_puts("\r\nHello, RVOS!\r\n");
 
-    page_init();
+    // page_init();
 
     trap_init();
     pfic_init();
