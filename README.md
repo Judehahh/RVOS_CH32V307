@@ -8,13 +8,18 @@
 - [x] 04-multitask
 - [x] 05-traps
 - [x] 06-interrupts
-- [ ] 07-hwtimer
+- [x] 07-hwtimer
+- [ ] 08-preemptive
+- [ ] 09-lock
+- [ ] 10-swtimer
+- [ ] 11-syscall
 - [x] exercise-7-1-helloRVOS-asm
 - [x] exercise-7-2-helloRVOS-echo
 - [x] exercise-8-1-memanagement-byte
 - [x] exercise-9-1-multitask-with param, priority and exit
 - [x] exercise-9-2-multitask-scheduletask
 - [ ] exercise-11-1-uart-write-interrupt
+- [ ] exercise-12-1-digital-clock
 - [ ] ...
 
 ## 准备
@@ -87,3 +92,22 @@ make code
 ### 07. 硬件定时器
 
 由于外设寄存器数量增加，参照沁恒官方的写法，修改成以 `struct` 的方式来读写寄存器，使寄存器读写操作更加方便；同时将 rcc 的初始化工作分离出来到 `rcc.c` 中。
+
+对于 CH32V307 的定时器，青稞 V4 内部设计了一个 SysTick，具体参考 `QingKeV4_Processor_Manual.PDF` 的第五章。
+
+要开启定时器中断，需要在 PFIC 将 `IENR1` 的第 12 位置 1（即 12 号中断）。
+```c
+/* enable SysTick interrupts. */
+PFIC_REG->IENR[0] |= (uint32_t)(0x00001000);
+```
+
+在每次时钟中断发生后，需要清除计数值比较标志，否则会一直触发中断，同时清除定时器计数值（或者继续增加 CMP 的值）：
+```c
+void timer_handler()
+{
+    STK_REG->CTLR |= (uint32_t)(1 << 5);
+    // STK_REG->CMP += (uint64_t)(p_ms * 1000);
+
+    STK_REG->SR &= ~(1 << 0);
+}
+```

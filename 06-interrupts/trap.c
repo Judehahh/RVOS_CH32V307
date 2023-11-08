@@ -1,16 +1,11 @@
 #include "os.h"
 
 extern void trap_vector(void);
-extern void uart_isr(void);
+extern void uart_irq_handler(void);
 
 void trap_init()
 {
     w_mtvec((reg_t)trap_vector);
-}
-
-void usart1_interrupt_Handler()
-{
-    uart_isr();
 }
 
 reg_t trap_handler(reg_t epc, reg_t cause)
@@ -22,7 +17,7 @@ reg_t trap_handler(reg_t epc, reg_t cause)
         switch (cause_code) {
             case 53:
                 uart_puts("USART1 interruption!\n");
-                usart1_interrupt_Handler();
+                uart_irq_handler();
                 break;
             default:
                 printf("unkown interruption! code = %d\n", cause_code);

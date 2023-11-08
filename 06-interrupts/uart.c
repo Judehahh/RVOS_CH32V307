@@ -148,7 +148,7 @@ int uart_getc(void)
 /*
  * handle a uart interrupt, raised because input has arrived, called from trap.c.
  */
-void uart_isr(void)
+void uart_irq_handler(void)
 {
 	while (1) {
 		int c = uart_getc();
