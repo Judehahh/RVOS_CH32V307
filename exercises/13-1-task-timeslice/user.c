@@ -2,8 +2,6 @@
 
 #define DELAY 1000
 
-extern void trap_test(void);
-
 void user_task0(void)
 {
     uart_puts("Task 0: Created!\n");
