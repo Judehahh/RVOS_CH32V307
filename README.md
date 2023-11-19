@@ -9,8 +9,8 @@
 - [x] 05-traps
 - [x] 06-interrupts
 - [x] 07-hwtimer
-- [ ] 08-preemptive
-- [ ] 09-lock
+- [x] 08-preemptive
+- [x] 09-lock
 - [ ] 10-swtimer
 - [ ] 11-syscall
 - [x] exercise-7-1-helloRVOS-asm
@@ -20,19 +20,25 @@
 - [x] exercise-9-2-multitask-scheduletask
 - [ ] exercise-11-1-uart-write-interrupt
 - [ ] exercise-12-1-digital-clock
+- [ ] exercise-14-1-spinlock
 - [ ] ...
 
 ## 准备
 
 ### Linux
 
-> 以下工作仅在 debian 中得到验证，仅供参考。
-
 > 如果觉得 linux 下的 OpenOCD 工具不那么好用，可以选择在 linux 下编译后在 Windows 中再使用 wch 的相关工具进行刷入或调试。
 
 工具安装：
+
+**Debian / Ubuntu**：
 ```shell
 sudo apt install gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf gdb-multiarch
+```
+
+**Archlinux**：
+```shell
+sudo pacman -S riscv64-elf-gcc riscv64-elf-binutils riscv64-elf-gdb
 ```
 
 下载代码以及 OpenOCD 工具：
@@ -73,7 +79,8 @@ make
 ```shell
 make flash
 ```
-使用`57600`波特率打开串口，按下开发板上的`RESET`按钮，即可观察到输出：
+
+使用`57600`波特率打开串口，按下开发板上的`RESET`按钮，即可观察到输出：    
 ![output](/pic/output.png)
 
 调试代码：
@@ -89,13 +96,27 @@ make code
 
 ## 说明
 
+### 05. Trap 和 Exception
+
+青稞 V4 中使用*可编程快速中断控制器*（Programmable Fast Interrupt Controller,PFIC）来管理异常和中断，与 Qemu 中的 PLIC 不同，具体可参考 `CH32FV2x_V3xRM.PDF` 的 `第 9 章 中断和事件` 以及 `QingKeV4_Processor_Manual.PDF` 的 `第 3 章 PFIC 与中断控制`。
+
+异常处理与课程中基本一致。
+
+### 06. 外部设备中断
+
+PFIC 的设置与课程中有些许不同，若要开启某个中断，需在 PFIC init 时 `PFIC_IENRx` (x = 1, 2, 3, 4) 寄存器中将该中断号对应的位置位。如“USART1 全局中断”的编号为 `53`，需要将 `PFIC_IENR2` 的第 $53 - 32 = 21$ 位置1。
+```c
+/* enable usart1 interrupts. */
+*(uint32_t *)PFIC_IENR2 |= (uint32_t)(0x00200000);
+```
+
 ### 07. 硬件定时器
 
 由于外设寄存器数量增加，参照沁恒官方的写法，修改成以 `struct` 的方式来读写寄存器，使寄存器读写操作更加方便；同时将 rcc 的初始化工作分离出来到 `rcc.c` 中。
 
 对于 CH32V307 的定时器，青稞 V4 内部设计了一个 SysTick，具体参考 `QingKeV4_Processor_Manual.PDF` 的第五章。
 
-要开启定时器中断，需要在 PFIC 将 `IENR1` 的第 12 位置 1（即 12 号中断）。
+要开启定时器中断，需要在 PFIC 将 `IENR1` 的第 12 位置 1（即 `12` 号中断）。
 ```c
 /* enable SysTick interrupts. */
 PFIC_REG->IENR[0] |= (uint32_t)(0x00001000);
@@ -111,3 +132,11 @@ void timer_handler()
     STK_REG->SR &= ~(1 << 0);
 }
 ```
+
+### 08. 抢占式多任务
+
+软件中断中断号为 `14`，需在 `PFIC_REG->IENR[0]` 中打开。
+
+### 09. 任务同步和锁
+
+本章代码与课程相同。
