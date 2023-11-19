@@ -1,11 +1,11 @@
 ifeq ($(shell uname -s),Linux)
-	ifneq ($(shell which riscv64-unknown-elf-gcc),)
+	ifneq ($(shell which riscv64-unknown-elf-gcc 2>/dev/null),)
 		CROSS_COMPILE := riscv64-unknown-elf-
 	else
 		CROSS_COMPILE := riscv64-elf-
 	endif
 	OPENOCD_DIR = ../../MRS_Toolchain_Linux_x64_V1.80/OpenOCD/bin
-	ifneq ($(shell which gdb-multiarch),)
+	ifneq ($(shell which gdb-multiarch 2>dev/null),)
 		GDB := gdb-multiarch
 	else
 		GDB := riscv64-elf-gdb

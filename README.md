@@ -29,7 +29,7 @@
 
 > 如果觉得 linux 下的 OpenOCD 工具不那么好用，可以选择在 linux 下编译后在 Windows 中再使用 wch 的相关工具进行刷入或调试。
 
-工具安装：
+#### 工具安装：
 
 **Debian / Ubuntu**：
 ```shell
@@ -41,7 +41,7 @@ sudo apt install gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf gdb-multia
 sudo pacman -S riscv64-elf-gcc riscv64-elf-binutils riscv64-elf-gdb
 ```
 
-下载代码以及 OpenOCD 工具：
+#### 下载代码以及 OpenOCD 工具：
 ```shell
 git clone https://github.com/Judehahh/RVOS_ch32v307.git
 cd RVOS_ch32v307
@@ -92,6 +92,38 @@ make debug
 查看反汇编：
 ```shell
 make code
+```
+
+## 可能遇到的问题
+
+### 1. 找不到libhidapi-hidraw.so.0
+
+运行 `make flash` 报错：
+```
+../MRS_Toolchain_Linux_x64_V1.80/OpenOCD/bin/openocd: error while loading shared libraries: libhidapi-hidraw.so.0: cannot open shared object file: No such file or directory
+```
+
+解决：
+```shell
+cd MRS_Toolchain_Linux_x64_V1.80/beforeinstall/
+./start.sh
+```
+
+### 2. LIBUSB_ERROR_ACCESS
+
+运行 `make flash` 报错：
+```
+Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+Error: open failed
+```
+
+解决：
+
+在执行过 `start.sh` 之后执行以下命令
+```shell
+sudo groupadd plugdev
+sudo usermod -a -G plugdev $USER
+sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
 ## 说明
