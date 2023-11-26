@@ -1,42 +1,31 @@
 #include "os.h"
+#include "user_api.h"
 
-#define DELAY 1000
-
-struct userdata {
-    int counter;
-    char *str;
-};
-
-/* Jack must be global */
-struct userdata person = {0, "Jack"};
-
-void timer_func(void *arg)
-{
-    if (arg == NULL)
-        return;
-
-    struct userdata *param = (struct userdata *)arg;
-
-    param->counter++;
-    printf("======> TIMEOUT: %s: %d\n", param->str, param->counter);
-}
+#define DELAY 2000
 
 void user_task0(void)
 {
     uart_puts("Task 0: Created!\n");
 
-    struct timer *t1 = timer_create(timer_func, &person, 3);
-    if (t1 == NULL) {
-        printf("timer_create() failed!\n");
+    unsigned int archid = -1;
+
+    /*
+     * if syscall is supported, this will trigger exception, 
+     * code = 2 (Illegal instruction)
+     */
+    // archid = r_marchid();
+    // printf("hart id is %d\n", archid);
+
+#ifdef CONFIG_SYSCALL
+    int ret = -1;
+    ret = getarchid(&archid);
+    // ret = getarchid(NULL);
+    if (ret) {
+        printf("getarchid() failed, return: %d\n", ret);
+    } else {
+        printf("system call returned, marchid id 0x%X\n", archid);
     }
-    struct timer *t2 = timer_create(timer_func, &person, 5);
-    if (t2 == NULL) {
-        printf("timer_create() failed!\n");
-    }
-    struct timer *t3 = timer_create(timer_func, &person, 7);
-    if (t3 == NULL) {
-        printf("timer_create() failed!\n");
-    }
+#endif
 
     while (1) {
         uart_puts("Task 0: Running...\n");

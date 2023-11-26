@@ -3,13 +3,14 @@
 extern void trap_vector(void);
 extern void uart_irq_handler(void);
 extern void timer_handler(void);
+extern void do_syscall(struct context *cxt);
 
 void trap_init()
 {
     w_mtvec((reg_t)trap_vector);
 }
 
-reg_t trap_handler(reg_t epc, reg_t cause)
+reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 {
     reg_t return_pc = epc;
     reg_t cause_code = cause & 0xfff;
@@ -35,9 +36,17 @@ reg_t trap_handler(reg_t epc, reg_t cause)
                 break;
         }
     } else {
-        printf("exception! code = %d\n", cause_code);
-        panic("OOPS! What can I do!");
-        //return_pc += 4;
+        switch (cause) {
+            case 8:
+                uart_puts("System call from U-mode!\n");
+                do_syscall(cxt);
+                return_pc += 4;
+                break;
+            default:
+                printf("exception! code = %d\n", cause_code);
+                panic("OOPS! What can I do!");
+                // return_pc += 4;
+        }
     }
 
     return return_pc;

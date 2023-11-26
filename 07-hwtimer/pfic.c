@@ -5,8 +5,8 @@
 void pfic_init(void)
 {
     /* enable machine-mode global interrupts. */
-    w_mstatus(MSTATUS_MPIE | MSTATUS_MIE);
-    
+    w_mstatus(r_mstatus() | MSTATUS_MPIE | MSTATUS_MIE);
+
     /* enable SysTick interrupts. */
     PFIC_REG->IENR[0] |= (uint32_t)(0x00001000);
 

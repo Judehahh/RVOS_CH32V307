@@ -3,6 +3,7 @@
 *.elf
 
 .vscode/
+.vscode-ctags
 
 MRS_Toolchain_Linux_x64_V1.80/
 MRS_Toolchain_Linux_x64_V1.80.tar.xz

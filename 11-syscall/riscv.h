@@ -14,6 +14,13 @@ static inline reg_t r_tp()
     return x;
 }
 
+static inline reg_t r_marchid()
+{
+    reg_t x;
+    asm volatile("csrr %0, marchid" : "=r" (x) );
+    return x;
+}
+
 /* No mhartid csr in QingKeV4 */
 #if 0
 static inline reg_t r_mhartid()
