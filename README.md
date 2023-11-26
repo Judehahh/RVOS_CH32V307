@@ -1,4 +1,6 @@
-# RVOS_ch32v307
+**RVOS_ch32v307**
+
+[toc]
 
 此仓库为 RVOS 课程在 ch32v307 开发板上的移植，目前已完成：
 - [x] 00-bootstrap
@@ -11,37 +13,35 @@
 - [x] 07-hwtimer
 - [x] 08-preemptive
 - [x] 09-lock
-- [ ] 10-swtimer
-- [ ] 11-syscall
+- [x] 10-swtimer
+- [x] 11-syscall
 - [x] exercise-7-1-helloRVOS-asm
 - [x] exercise-7-2-helloRVOS-echo
 - [x] exercise-8-1-memanagement-byte
 - [x] exercise-9-1-multitask-with param, priority and exit
 - [x] exercise-9-2-multitask-scheduletask
 - [ ] exercise-11-1-uart-write-interrupt
-- [ ] exercise-12-1-digital-clock
+- [x] exercise-12-1-digital-clock
 - [ ] exercise-14-1-spinlock
 - [ ] ...
 
-## 准备
+# 准备
 
-### Linux
+## Linux
 
-> 如果觉得 linux 下的 OpenOCD 工具不那么好用，可以选择在 linux 下编译后在 Windows 中再使用 wch 的相关工具进行刷入或调试。
+工具安装：
 
-#### 工具安装：
-
-**Debian / Ubuntu**：
+Debian / Ubuntu：
 ```shell
 sudo apt install gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf gdb-multiarch
 ```
 
-**Archlinux**：
+Archlinux：
 ```shell
 sudo pacman -S riscv64-elf-gcc riscv64-elf-binutils riscv64-elf-gdb
 ```
 
-#### 下载代码以及 OpenOCD 工具：
+下载代码以及 OpenOCD 工具：
 ```shell
 git clone https://github.com/Judehahh/RVOS_ch32v307.git
 cd RVOS_ch32v307
@@ -49,7 +49,9 @@ wget http://file.mounriver.com/tools/MRS_Toolchain_Linux_x64_V1.80.tar.xz
 tar -xvf MRS_Toolchain_Linux_x64_V1.80.tar.xz
 ```
 
-### MACOS
+## MACOS
+
+> 只在 x86 中经过验证，arm （理论上）需要解压 MRS_Toolchain 中的 arm 架构的 openocd 压缩文件，并修改 `common.mk` 文件中的 openocd 路径。
 
 工具安装：
 ```shell
@@ -67,7 +69,7 @@ unzip openocd_x86_64.zip
 cd ..
 ```
 
-## 运行
+# 运行
 
 编译：
 ```shell
@@ -94,9 +96,9 @@ make debug
 make code
 ```
 
-## 可能遇到的问题
+# 可能遇到的问题
 
-### 1. 找不到libhidapi-hidraw.so.0
+## 1. 找不到 libhidapi-hidraw.so.0
 
 运行 `make flash` 报错：
 ```
@@ -109,7 +111,7 @@ cd MRS_Toolchain_Linux_x64_V1.80/beforeinstall/
 ./start.sh
 ```
 
-### 2. LIBUSB_ERROR_ACCESS
+## 2. 报错 LIBUSB_ERROR_ACCESS
 
 运行 `make flash` 报错：
 ```
@@ -126,15 +128,40 @@ sudo usermod -a -G plugdev $USER
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
-## 说明
+完成以上步骤后需要重新登陆一下 linux 用户。
 
-### 05. Trap 和 Exception
+# 说明
 
-青稞 V4 中使用*可编程快速中断控制器*（Programmable Fast Interrupt Controller,PFIC）来管理异常和中断，与 Qemu 中的 PLIC 不同，具体可参考 `CH32FV2x_V3xRM.PDF` 的 `第 9 章 中断和事件` 以及 `QingKeV4_Processor_Manual.PDF` 的 `第 3 章 PFIC 与中断控制`。
+一切的开始前，需要先准备好芯片相关手册：
+- QingKeV4微处理器手册：[QingKeV4_Processor_Manual.PDF](https://www.wch.cn/downloads/QingKeV4_Processor_Manual_PDF.html)
+- CH32FV2x_V3xRM应用手册：[CH32FV2x_V3xRM.PDF](https://www.wch.cn/downloads/CH32FV2x_V3xRM_PDF.html)
+- CH32V307数据手册：[CH32V307DS0.PDF](https://www.wch.cn/downloads/CH32V307DS0_PDF.html)
+
+接着要确保开发板的 Flash 分配为 256K，RAM 为 64K。（这应该是开发板的默认设置）
+
+## 00. 启动
+
+查看《CH32V307DS0.PDF》的第 2 章的存储器地址映射图，得知开发板的 Flash 从 `0x00000000` 开始。因此，将 `Makefile` 中的 `-Ttext` flag 从 `0x80000000 ` 改为 `0x00000000`。
+
+而 RAM 的始址为 `0x20000000`，加上 64K 的容量，RAM 在 `0x20010000` 处结束，因此在启动时将 `sp` 指针指向 `0x20010000`。
+
+## 01. 基本串口输出
+
+这一章的移植比较费工夫， 作为一个 MCU 开发板，我们在使用外设之前，需要先自己配置好时钟（RCC），对这块不熟悉的同学可以先到b站上搜索一下 stm32 开发板相关的时钟树教学视频来了解一下相关概念（ch32 的相关资源较少，可以使用 stm32 作为参考）。
+
+从《CH32FV2x_V3xRM.PDF》的第 2 章中的图 2-3 可以了解 ch32v307 的时钟树架构，以下为本章代码的时钟配置简单示意图：
+
+![](pic/rcc.png)
+
+配置完 RCC 后就可以进行 UART 的配置了，详细可以参考《CH32FV2x_V3xRM.PDF》的第 18 章。
+
+## 05. Trap 和 Exception
+
+青稞 V4 中使用*可编程快速中断控制器*（Programmable Fast Interrupt Controller, PFIC）来管理异常和中断，与 Qemu 中的 PLIC 不同，具体可参考 《CH32FV2x_V3xRM.PDF》 的第 9 章以及《QingKeV4_Processor_Manual.PDF》的第 3 章。
 
 异常处理与课程中基本一致。
 
-### 06. 外部设备中断
+## 06. 外部设备中断
 
 PFIC 的设置与课程中有些许不同，若要开启某个中断，需在 PFIC init 时 `PFIC_IENRx` (x = 1, 2, 3, 4) 寄存器中将该中断号对应的位置位。如“USART1 全局中断”的编号为 `53`，需要将 `PFIC_IENR2` 的第 $53 - 32 = 21$ 位置1。
 ```c
@@ -142,11 +169,11 @@ PFIC 的设置与课程中有些许不同，若要开启某个中断，需在 PF
 *(uint32_t *)PFIC_IENR2 |= (uint32_t)(0x00200000);
 ```
 
-### 07. 硬件定时器
+## 07. 硬件定时器
 
 由于外设寄存器数量增加，参照沁恒官方的写法，修改成以 `struct` 的方式来读写寄存器，使寄存器读写操作更加方便；同时将 rcc 的初始化工作分离出来到 `rcc.c` 中。
 
-对于 CH32V307 的定时器，青稞 V4 内部设计了一个 SysTick，具体参考 `QingKeV4_Processor_Manual.PDF` 的第五章。
+对于 CH32V307 的定时器，青稞 V4 内部设计了一个 SysTick，具体参考《QingKeV4_Processor_Manual.PDF》的第5章。
 
 要开启定时器中断，需要在 PFIC 将 `IENR1` 的第 12 位置 1（即 `12` 号中断）。
 ```c
@@ -165,10 +192,26 @@ void timer_handler()
 }
 ```
 
-### 08. 抢占式多任务
+## 08. 抢占式多任务
 
-软件中断中断号为 `14`，需在 `PFIC_REG->IENR[0]` 中打开。
+软件中断中断号为 `14`，需在 `PFIC_REG->IENR[0]` （即 `IENR1`）中打开。
 
-### 09. 任务同步和锁
+## 09. 任务同步和锁
 
 本章代码与课程相同。
+
+## 10. 软件定时器
+
+本章代码与课程相同。
+
+## 11. 系统调用
+
+根据《QingKeV4_Processor_Manual.PDF》中 csr 寄存器的相关介绍，青稞 V4 中并没有 `mhartid` 寄存器，我们这里通过读 `marchid` 寄存器来实现相同的功能，该寄存器同样为 **MRO**（仅机器模式可读）。
+
+> 注意：我读取了 `marchid` 寄存器发现读得的值为 `0xDC68D881`，但官方手册中说青稞 V4F 应该为 `0xDC68D886`
+> ![](pic/marchid.png)
+>
+> 在沁恒社区中官方给出的解释如下：
+> ![](pic/misa.png)
+>
+> 这可能是芯片本身存在的问题，各位可以自己尝试读取 `misa` 寄存器验证一下。

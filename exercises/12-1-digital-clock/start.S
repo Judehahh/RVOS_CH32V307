@@ -28,5 +28,5 @@ _start:
 2:
     # jump to start_kernel
     j       start_kernel
-    
+
     .end
