@@ -2,6 +2,7 @@
 
 <!-- TOC -->
 
+- [介绍](#介绍)
 - [准备](#准备)
   - [Linux](#linux)
   - [MACOS](#macos)
@@ -12,6 +13,9 @@
 - [说明](#说明)
   - [00. 启动](#00-启动)
   - [01. 基本串口输出](#01-基本串口输出)
+  - [02. 内存管理](#02-内存管理)
+  - [03. 上下文切换](#03-上下文切换)
+  - [04. 协作式多任务](#04-协作式多任务)
   - [05. Trap 和 Exception](#05-trap-和-exception)
   - [06. 外部设备中断](#06-外部设备中断)
   - [07. 硬件定时器](#07-硬件定时器)
@@ -22,7 +26,9 @@
 
 <!-- /TOC -->
 
-此仓库为 RVOS 课程在 ch32v307 开发板上的移植，目前已完成：
+# 介绍
+
+此仓库为 [RVOS 课程](https://www.bilibili.com/video/BV1Q5411w7z5)在 ch32v307 开发板上的移植，目前已完成：
 - [x] 00-bootstrap
 - [x] 01-helloRVOS
 - [x] 02-memanagement
@@ -44,6 +50,12 @@
 - [x] exercise-12-1-digital-clock
 - [ ] exercise-14-1-spinlock
 - [ ] ...
+
+使用的硬件为自带 WCH-Link 的 CH32V307V 评估板：
+
+![](pic/CH32V307.png)
+
+由于开发板上自带调试器，可以很方便地进行下载和调试，便于我们学习 Risc-V 底层开发。
 
 # 准备
 
@@ -165,6 +177,8 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 而 RAM 的始址为 `0x20000000`，加上 64K 的容量，RAM 在 `0x20010000` 处结束，因此在启动时将 `sp` 指针指向 `0x20010000`。
 
+另外，由于 ch32v307 只有一个核，并且没有 `mhartid` 寄存器，因此可以省略 hart 相关的代码。
+
 ## 01. 基本串口输出
 
 这一章的移植比较费工夫， 作为一个 MCU 开发板，我们在使用外设之前，需要先自己配置好时钟（RCC），对这块不熟悉的同学可以先到b站上搜索一下 stm32 开发板相关的时钟树教学视频来了解一下相关概念（ch32 的相关资源较少，可以使用 stm32 作为参考）。
@@ -173,13 +187,48 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 ![](pic/rcc.png)
 
-配置完 RCC 后就可以进行 UART 的配置了，详细可以参考《CH32FV2x_V3xRM.PDF》的第 18 章。
+最终我们将 PLL 输出的 48Mhz 时钟配置为系统时钟，然后我们就可以启用 UART 和 A 组 GPIO 的时钟了（UART1 对应的 GPIO 为 GPIO PA9）。详细的说明可以参考《CH32FV2x_V3xRM.PDF》的第 10 章与第 18 章。
+
+## 02. 内存管理
+
+从这一章开始加入了链接脚本，与课程中不同的是，MCU 中通常将 bin 文件都放在 Flash 中。在运行时，text 段与 rodata 段都是在 Flash 中直接读取及运行，而 data 段与 bss 段则需要放在 RAM 中。因此在启动时需要**手动将 data 段从 Flash 搬到 RAM 中**，同时清空 bss 段。
+
+```asm
+    # load data section from flash to RAM
+    la      a0, _data_lma
+    la      a1, _data_vma
+    la      a2, _data_end
+    bgeu    a1, a2, 2f
+1:
+    lw      t0, (a0)
+    sw      t0, (a1)
+    addi    a0, a0, 4
+    addi    a1, a1, 4
+    bltu    a1, a2, 1b
+2:
+    # clear bss section
+    la      a0, _bss_start
+    la      a1, _bss_end
+    bgeu    a0, a1, 2f
+1:
+    sw      zero, (a0)
+    addi    a0, a0, 4
+    bltu    a0, a1, 1b
+```
+
+## 03. 上下文切换
+
+本章代码与课程相同。
+
+## 04. 协作式多任务
+
+本章代码与课程相同。
 
 ## 05. Trap 和 Exception
 
-青稞 V4 中使用*可编程快速中断控制器*（Programmable Fast Interrupt Controller, PFIC）来管理异常和中断，与 Qemu 中的 PLIC 不同，具体可参考 《CH32FV2x_V3xRM.PDF》 的第 9 章以及《QingKeV4_Processor_Manual.PDF》的第 3 章。
+青稞 V4 中使用*可编程快速中断控制器*（Programmable Fast Interrupt Controller, PFIC）来管理异常和中断，与 QEMU 中的 PLIC 不同，具体可参考 《CH32FV2x_V3xRM.PDF》 的第 9 章以及《QingKeV4_Processor_Manual.PDF》的第 3 章。
 
-异常处理与课程中基本一致。
+异常处理流程与课程中基本一致。
 
 ## 06. 外部设备中断
 
